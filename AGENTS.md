@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- hero:managed-start v=dev -->
+<!-- hero:managed-start v=v0.34.1 -->
 ## Hero — Spec-Driven AI Engineering
 
 This project uses **Hero** for spec-driven engineering workflows. Hero manages specs, integrates with work trackers (Jira, GitHub, Linear), and provides structured workflows via slash commands.
@@ -74,7 +74,7 @@ These are run in the terminal, not as slash commands:
 - `.hero/knowledge/` — Project knowledge base (conventions, decisions, context)
 - `.hero/hero.json` — Project configuration
 
-`hero install` **writes** these into your harness's own directory in that harness's native format — e.g. `.claude/commands/`, `.claude/agents/`, and `.claude/skills/` for Claude; `.codex/agents/*.toml` (TOML) plus workflow skills under `.agents/skills/` for Codex (Codex has no commands directory — its slash commands are a built-in enum, so Hero commands install there as skills). They are generated copies, **not** symlinks or views: re-running `hero install` regenerates them, so hand-edits to the installed files are overwritten on the next install.
+`hero install` **writes** these into your harness's own directory in that harness's native format — e.g. `.claude/commands/`, `.claude/agents/`, and `.claude/skills/` for Claude; `.codex/agents/*.toml` (TOML) plus workflow skills under `.agents/skills/` for Codex; and `.grok/agents/*.md` plus canonical and `command-*` skills under `.grok/skills/` for Grok Build. Codex and Grok have no Hero-owned commands directory, so Hero commands install there as skills. They are generated copies, **not** symlinks or views: re-running `hero install` regenerates them, so hand-edits to the installed files are overwritten on the next install.
 
 ### Declaring Spec Relationships
 
@@ -137,34 +137,6 @@ Some harnesses defer MCP tool schemas behind a one-time lookup before the tool i
 - Capture novel learnings to `.hero/knowledge/` at the end of major workflows
 - Specs use YAML frontmatter with fields: title, type, status, tracker_id, priority, severity
 - Imported specs include tracker-prefixed fields (e.g. jira_status, jira_priority, jira_assignee) under a # Jira/GitHub/Linear comment header
-
-### Running Hero Workflows in Codex
-
-Hero's workflow commands are **not slash commands in Codex** — they are skill files you read and follow step-by-step.
-
-**When the user asks you to deliver, diagnose, design, or run any Hero workflow:**
-
-1. Read the workflow skill file at `.agents/skills/command-<name>/SKILL.md`
-   (e.g. `.agents/skills/command-deliver/SKILL.md` when the user says "deliver")
-2. Follow each step in the file as your workflow. These are **instructions to execute**, not documentation.
-3. **Do NOT** skip steps, flip spec frontmatter as a shortcut, or treat the workflow as informational.
-
-**Workflow routing table for Codex:**
-
-| User intent | Skill file to read and follow |
-|---|---|
-| Deliver, implement, ship, execute | `.agents/skills/command-deliver/SKILL.md` |
-| Diagnose, investigate, debug, fix | `.agents/skills/command-diagnose/SKILL.md` |
-| Design, plan, spec, add feature | `.agents/skills/command-design/SKILL.md` |
-| Review, PR, pull request | `.agents/skills/command-review/SKILL.md` |
-| Check, health, validate workspace | `.agents/skills/command-check/SKILL.md` |
-| Note, capture, remember | `.agents/skills/command-note/SKILL.md` |
-| Compose, break down, epic | `.agents/skills/command-compose/SKILL.md` |
-| Discover, brainstorm, explore | `.agents/skills/command-discover/SKILL.md` |
-
-If the skill file doesn't exist, fall back to reading `.claude/commands/<name>.md` directly.
-
-**A Hero workflow is not finished until its closing gate runs.** For `/deliver`, that gate is `hero spec verify <slug>` passing — and verify requires the cold delivery audit to have run first. Do NOT yield back to the user with a spec still in `planning` or `delivering` and the audit unrun. The audit and verify run in the **same turn** as the implementation — they are not a follow-up step the user triggers later. If you find yourself about to say "the audit still needs to run" or "I did not mark the spec complete because the gate still needs to run" — **run it now instead.** Stopping one step short of the closing gate is an unfinished delivery, not a handoff. This holds in every delivery mode, including the default supervised mode: "pause at handoffs" does not include the closing gates.
 
 ## Natural Language Routing
 
