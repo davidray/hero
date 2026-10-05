@@ -1,6 +1,7 @@
 ---
 name: dedup-scrubber
 description: Find and consolidate duplicated code. Apply DRY where it reduces complexity without adding indirection.
+model_tier: standard
 mode: subagent
 temperature: 0.1
 color: secondary
