@@ -55,8 +55,6 @@ These are run in the terminal, not as slash commands:
 - `hero sync pull <slug>` — sync spec status from tracker
 - `hero note <slug>` — quick note capture
 - `hero check` — health check
-**Project Mail** is the generic transport — durable envelopes, inbox/outbox, receipts, replies. **Peering** is the application layer on top of Mail — it adds semantic meaning (advisory questions, spec-out requests, work transfers) and structured metadata (mode, provenance, related spec, budget hints). Peering commands compose typed Mail messages; Mail knows nothing about peering semantics. Use `hero_mail_*` MCP tools for raw inbox operations; use `hero peer call` / `hero handoff` CLI commands for structured cross-repo interactions.
-
 - `hero peer list` — list registered sibling repos with reachability + manifest status
 - `hero peer show <alias>` — inspect one peer (manifest contents, in-flight handoffs)
 - `hero peer call <alias> --mode=advisory "..."` — send an asynchronous Project Mail question (no model launch or receiver-tree write)
@@ -76,7 +74,7 @@ These are run in the terminal, not as slash commands:
 - `.hero/knowledge/` — Project knowledge base (conventions, decisions, context)
 - `.hero/hero.json` — Project configuration
 
-`hero install` **writes** these into your harness's own directory in that harness's native format — e.g. `.claude/commands/`, `.claude/agents/`, and `.claude/skills/` for Claude; `.codex/agents/*.toml` (TOML) plus workflow skills under `.agents/skills/` for Codex (Codex has no commands directory — its slash commands are a built-in enum, so Hero commands install there as skills). They are generated copies, **not** symlinks or views: re-running `hero install` regenerates them, so hand-edits to the installed files are overwritten on the next install.
+`hero install` **writes** these into your harness's own directory in that harness's native format — e.g. `.claude/commands/`, `.claude/agents/`, and `.claude/skills/` for Claude; `.codex/agents/*.toml` (TOML) plus workflow skills under `.agents/skills/` for Codex; and `.grok/agents/*.md` plus canonical and `command-*` skills under `.grok/skills/` for Grok Build. Codex and Grok have no Hero-owned commands directory, so Hero commands install there as skills. They are generated copies, **not** symlinks or views: re-running `hero install` regenerates them, so hand-edits to the installed files are overwritten on the next install.
 
 ### Declaring Spec Relationships
 
@@ -190,8 +188,6 @@ When routing, pass the user's original context as arguments to the workflow. If 
 Route ordinary Attention language to the typed operation below. Use the
 advertised MCP schema or row action as the executable contract; do not invent
 arguments or action IDs from prose.
-
-The Mail rows below use the generic transport (`hero_mail_*` MCP tools) for unstructured messages and raw inbox operations. The Peering rows use the semantic layer (`hero peer call` / `hero handoff` CLI) for structured cross-repo interactions that carry mode, provenance, and related-spec metadata. Peer calls *produce* Mail — they are not an alternative to it.
 
 | User intent | Example | Canonical operation |
 |---|---|---|
