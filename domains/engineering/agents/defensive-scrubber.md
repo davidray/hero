@@ -1,6 +1,7 @@
 ---
 name: defensive-scrubber
 description: Remove unnecessary error-swallowing, panic recovery, and fallback patterns that hide bugs instead of handling them.
+model_tier: standard
 mode: subagent
 temperature: 0.1
 color: secondary

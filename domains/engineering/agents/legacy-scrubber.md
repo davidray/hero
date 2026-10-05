@@ -1,6 +1,7 @@
 ---
 name: legacy-scrubber
 description: Find and remove deprecated, legacy, and fallback code. Make all code paths clean, concise, and singular.
+model_tier: standard
 mode: subagent
 temperature: 0.1
 color: secondary

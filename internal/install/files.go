@@ -15,15 +15,24 @@ import (
 
 func copyFileFromFS(opts Options, result *Result, srcFS fs.FS, srcPath, dst string) error {
 	if opts.DryRun {
-		progressf(opts, "  %s -> %s\n", srcPath, dst)
-		result.Copied = append(result.Copied, CopyAction{Source: srcPath, Dest: dst})
-		return nil
+		return writeInstalledFile(opts, result, srcPath, nil, dst)
 	}
 
 	// Read source once; reused for both the equality check and the write.
 	srcData, err := fs.ReadFile(srcFS, srcPath)
 	if err != nil {
 		return err
+	}
+	return writeInstalledFile(opts, result, srcPath, srcData, dst)
+}
+
+// writeInstalledFile writes srcData (the bytes install produces for srcPath)
+// to dst under the same idempotency and trusted-checksum rules as a plain copy.
+func writeInstalledFile(opts Options, result *Result, srcPath string, srcData []byte, dst string) error {
+	if opts.DryRun {
+		progressf(opts, "  %s -> %s\n", srcPath, dst)
+		result.Copied = append(result.Copied, CopyAction{Source: srcPath, Dest: dst})
+		return nil
 	}
 
 	if _, err := os.Stat(dst); err == nil && !opts.Force {

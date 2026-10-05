@@ -3,6 +3,7 @@ package install
 import (
 	"bufio"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,12 +52,67 @@ func installFlat(opts Options, result *Result, kind, destDir string) error {
 		// before/independent of copyFileFromFS, whose Copied append is
 		// skipped on a byte-match no-op. See prune.go / Result.rendered.
 		result.rendered = append(result.rendered, dst)
-		if err := copyFileFromFS(opts, result, srcFS, srcPath, dst); err != nil {
+		if kind != "agents" {
+			if err := copyFileFromFS(opts, result, srcFS, srcPath, dst); err != nil {
+				return err
+			}
+			continue
+		}
+		data, err := fs.ReadFile(srcFS, srcPath)
+		if err != nil {
+			return err
+		}
+		data, err = renderAgentModelTier(data, opts.Target == TargetClaude)
+		if err != nil {
+			return fmt.Errorf("%s: %w", srcPath, err)
+		}
+		if err := writeInstalledFile(opts, result, srcPath, data, dst); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// claudeModelForTier maps an agent's harness-neutral `model_tier:` to Claude
+// Code's `model:` value. "deep" maps to "": no model line, so the agent
+// inherits the session's model.
+var claudeModelForTier = map[string]string{
+	"light":    "haiku",
+	"standard": "sonnet",
+	"deep":     "",
+}
+
+// renderAgentModelTier rewrites the `model_tier:` line of an agent's leading
+// frontmatter: to `model: <claude model>` when claude is true, otherwise it
+// drops the line, since OpenCode and other verbatim targets read their own
+// `model` key in a different format. Agents without the key are returned
+// unchanged.
+func renderAgentModelTier(data []byte, claude bool) ([]byte, error) {
+	lines := strings.SplitAfter(string(data), "\n")
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) != "---" {
+		return data, nil
+	}
+	for i := 1; i < len(lines); i++ {
+		trimmed := strings.TrimSpace(lines[i])
+		if trimmed == "---" {
+			return data, nil
+		}
+		if !strings.HasPrefix(lines[i], "model_tier:") {
+			continue
+		}
+		tier := strings.Trim(strings.TrimSpace(strings.TrimPrefix(trimmed, "model_tier:")), `"'`)
+		model, ok := claudeModelForTier[tier]
+		if !ok {
+			return nil, fmt.Errorf("unknown model_tier %q (want light, standard or deep)", tier)
+		}
+		replacement := ""
+		if claude && model != "" {
+			replacement = "model: " + model + "\n"
+		}
+		return []byte(strings.Join(lines[:i], "") + replacement + strings.Join(lines[i+1:], "")), nil
+	}
+	return data, nil
 }
 
 // agentMatchesActiveDomain returns true if the agent file's frontmatter

@@ -1,6 +1,7 @@
 ---
 name: documentation-engineer
 description: Create and update technical documentation that reflects how the system actually works and how to operate it safely.
+model_tier: standard
 mode: subagent
 temperature: 0.2
 color: secondary

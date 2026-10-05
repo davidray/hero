@@ -1,6 +1,7 @@
 ---
 name: session-primer
 description: Load session context — what's in progress, active conventions, decisions, and what to watch for. Context-only, no implementation.
+model_tier: light
 mode: subagent
 temperature: 0.1
 color: primary

@@ -1,6 +1,7 @@
 ---
 name: dependency-scrubber
 description: Analyze and improve dependency structure — untangle circular dependencies, reduce coupling, simplify import graphs.
+model_tier: standard
 mode: subagent
 temperature: 0.1
 color: secondary
